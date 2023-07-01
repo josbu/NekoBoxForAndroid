@@ -191,10 +191,13 @@ object LocalResolverImpl : LocalResolver, LocalDNSTransport {
                 }
             }
         } else {
-            val underlyingNetwork =
-                SagerNet.underlyingNetwork ?: error("upstream network not found")
             val answer = try {
-                underlyingNetwork.getAllByName(domain)
+                val u = SagerNet.underlyingNetwork
+                if (u != null) {
+                    u.getAllByName(domain)
+                } else {
+                    InetAddress.getAllByName(domain)
+                }
             } catch (e: UnknownHostException) {
                 ctx.errorCode(RCODE_NXDOMAIN)
                 return
